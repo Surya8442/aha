@@ -4,17 +4,17 @@ pipeline {
 
     environment {
         SONARQUBE_ENV = 'sq'
-        DOCKER_IMAGE = "rajeshtutta123/rajesh_hotstar-02-04-26"
-        AWS_CREDS = credentials('aws-creds')
-        AWS_DEFAULT_REGION = 'us-east-1'
-        RECIPIENTS = 'rajeshtutta123@gmail.com'
+        DOCKER_IMAGE = "surya8442/aha"
+        
+        AWS_DEFAULT_REGION = 'ap-south-1'
+        RECIPIENTS = 'suryakandipalli@gmail.com'
     }
 
     stages {
 
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/rajeshtutta/Hotstar-02-04-26-.git'
+                git branch: 'main', url: 'https://github.com/Surya8442/aha.git'
             }
         }
         stage('BUILD') {
@@ -54,7 +54,7 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                withCredentials([usernamePassword(credentialsId: 'Docker-cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh '''
                     echo $PASS | docker login -u $USER --password-stdin
                     docker push $DOCKER_IMAGE:latest
@@ -78,9 +78,8 @@ pipeline {
         stage('Deploy to EKS') {
             steps {
                 sh '''
-                export AWS_ACCESS_KEY_ID=$AWS_CREDS_USR
-                export AWS_SECRET_ACCESS_KEY=$AWS_CREDS_PSW
-
+                    export KUBECONFIG=/var/lib/jenkins/.kube/config
+                    kubectl get nodes
                 aws eks update-kubeconfig --region us-east-1 --name mycluster
                 kubectl apply -f deployment.yml
                 kubectl apply -f service.yml
